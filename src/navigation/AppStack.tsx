@@ -1,8 +1,9 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@react-native-vector-icons/ionicons';
+
 import HomeScreen from '../screens/main/HomeScreen';
-import ThemesScreen from '../screens/main/ThemesScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
+import ThemesStack from './ThemesStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -31,7 +32,7 @@ export default function AppStack() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Themes" component={ThemesScreen} />
+      <Tab.Screen name="Themes" component={ThemesStack} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
