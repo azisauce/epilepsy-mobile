@@ -2,14 +2,14 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import { themesData } from '../../data/themesData';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../types';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Theme } from '../../types/themes.types';
 
 export default function ThemesScreen() {
   // Define the navigation prop type
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'ThemesScreen'>>();
+  const navigation = useNavigation<StackNavigationProp<any, 'ThemesScreen'>>();
 
-  const renderTheme = ({ item }) => (
+  const renderTheme = ({ item } : {item: Theme}) => (
     <TouchableOpacity
       style={[styles.themeCard, { borderLeftColor: item.color }]}
       onPress={() => navigation.navigate('ThemeCourses', { theme: item })}

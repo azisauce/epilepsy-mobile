@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Course } from '../../types/themes.types';
 
 
 export default function ThemeCoursesScreen() {
@@ -9,7 +10,7 @@ export default function ThemeCoursesScreen() {
   const route = useRoute();
   const { theme } = route.params;
 
-  const renderCourse = ({ item }) => (
+  const renderCourse = ({ item } : { item : Course}) => (
     <TouchableOpacity
       style={styles.courseCard}
       onPress={() => navigation.navigate('CourseDetail', { course: item, themeColor: theme.color })}

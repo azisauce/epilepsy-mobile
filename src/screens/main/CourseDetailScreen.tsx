@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { CourseContent } from '../../types/themes.types';
 
 
 export default function CourseDetailScreen() {
@@ -9,7 +10,7 @@ export default function CourseDetailScreen() {
   const route = useRoute();
   const { course, themeColor } = route.params;
 
-  const renderContent = (item, index) => {
+  const renderContent = (item : CourseContent, index: any) => {
     if (item.type === 'text') {
       return (
         <Text key={index} style={styles.contentText}>
@@ -56,7 +57,7 @@ export default function CourseDetailScreen() {
           <View style={styles.divider} />
           
           <View style={styles.courseContent}>
-            {course.content.map((item, index) => renderContent(item, index))}
+            {course.content.map((item : CourseContent, index: any) => renderContent(item, index))}
           </View>
         </View>
       </ScrollView>
