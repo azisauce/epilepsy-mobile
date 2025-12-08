@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import CustomAlert from '../../components/CustomAlert';
 import {
   View,
   Text,
@@ -8,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -43,23 +44,187 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Error states
+  const [firstNameError, setFirstNameError] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    title: '',
+    message: '',
+  });
+
+  const showAlert = (title: string, message: string) => {
+    setAlertConfig({ title, message });
+    setAlertVisible(true);
+  };
+
+  // Email validation
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Password validation
+  const validatePassword = (password: string): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    if (password.length < 8) {
+      errors.push('Minimum 8 characters required');
+    }
+    
+    if (!/[a-zA-Z]/.test(password)) {
+      errors.push('Must contain at least one letter');
+    }
+    
+    if (!/\d/.test(password)) {
+      errors.push('Must contain at least one digit');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  };
+
+  // Check if form is valid
+  const isFormValid = (): boolean => {
+    return (
+      firstName.trim() !== '' &&
+      lastName.trim() !== '' &&
+      email.trim() !== '' &&
+      phoneNumber.trim() !== '' &&
+      password !== '' &&
+      confirmPassword !== '' &&
+      !firstNameError &&
+      !lastNameError &&
+      !emailError &&
+      !phoneNumberError &&
+      !passwordError &&
+      !confirmPasswordError
+    );
+  };
+
+  // Real-time validation handlers
+  const handleFirstNameChange = (text: string) => {
+    setFirstName(text);
+    if (!text.trim()) {
+      setFirstNameError('First name is required');
+    } else {
+      setFirstNameError('');
+    }
+  };
+
+  const handleLastNameChange = (text: string) => {
+    setLastName(text);
+    if (!text.trim()) {
+      setLastNameError('Last name is required');
+    } else {
+      setLastNameError('');
+    }
+  };
+
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    if (!text.trim()) {
+      setEmailError('Email is required');
+    } else if (!validateEmail(text)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const handlePhoneNumberChange = (text: string) => {
+    setPhoneNumber(text);
+    if (!text.trim()) {
+      setPhoneNumberError('Phone number is required');
+    } else {
+      setPhoneNumberError('');
+    }
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    const passwordValidation = validatePassword(text);
+    if (!text) {
+      setPasswordError('Password is required');
+    } else if (!passwordValidation.isValid) {
+      setPasswordError(passwordValidation.errors.join(' & '));
+    } else {
+      setPasswordError('');
+    }
+
+    // Also validate confirm password if it has a value
+    if (confirmPassword) {
+      if (text !== confirmPassword) {
+        setConfirmPasswordError('Passwords do not match');
+      } else {
+        setConfirmPasswordError('');
+      }
+    }
+  };
+
+  const handleConfirmPasswordChange = (text: string) => {
+    setConfirmPassword(text);
+    if (!text) {
+      setConfirmPasswordError('Please confirm your password');
+    } else if (text !== password) {
+      setConfirmPasswordError('Passwords do not match');
+    } else {
+      setConfirmPasswordError('');
+    }
+  };
 
   const handleRegister = async () => {
-    // Validation
-    if (!firstName || !lastName || !email || !phoneNumber || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
+    // Final validation check
+    let hasError = false;
+
+    if (!firstName.trim()) {
+      setFirstNameError('First name is required');
+      hasError = true;
+    }
+    if (!lastName.trim()) {
+      setLastNameError('Last name is required');
+      hasError = true;
+    }
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      hasError = true;
+    }
+    if (!phoneNumber.trim()) {
+      setPhoneNumberError('Phone number is required');
+      hasError = true;
+    }
+    if (!password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    } else {
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        setPasswordError(passwordValidation.errors.join(' & '));
+        hasError = true;
+      }
+    }
+    if (!confirmPassword) {
+      setConfirmPasswordError('Please confirm your password');
+      hasError = true;
+    } else if (password !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match');
+      hasError = true;
     }
 
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
-      return;
-    }
+    if (hasError) return;
 
     setLoading(true);
     try {
@@ -72,13 +237,14 @@ export default function RegisterScreen() {
         role: userRole,
       });
     } catch (error: any) {
-      Alert.alert('Registration Error', error.message || 'Failed to create account');
+      showAlert('Registration Error', error.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
   };
 
   const selectedRoleLabel = USER_ROLES.find(role => role.value === userRole)?.label || 'Parent';
+  const isButtonDisabled = loading || !isFormValid();
 
   return (
     <SafeAreaProvider style={styles.container}>
@@ -86,18 +252,18 @@ export default function RegisterScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backIcon}>‹</Text>
+        </TouchableOpacity>
+
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.backIcon}>‹</Text>
-          </TouchableOpacity>
-
           <View style={styles.content}>
             <Text style={styles.title}>Join Us</Text>
 
@@ -105,35 +271,66 @@ export default function RegisterScreen() {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>First name</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, firstNameError && styles.inputError]}
+                  placeholder="first name"
+                  placeholderTextColor="#999"
                   value={firstName}
-                  onChangeText={setFirstName}
+                  onChangeText={handleFirstNameChange}
                   autoCapitalize="words"
                   autoComplete="name-given"
                 />
+                {firstNameError ? (
+                  <Text style={styles.errorText}>{firstNameError}</Text>
+                ) : null}
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Last name</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, lastNameError && styles.inputError]}
+                  placeholder="last name"
+                  placeholderTextColor="#999"
                   value={lastName}
-                  onChangeText={setLastName}
+                  onChangeText={handleLastNameChange}
                   autoCapitalize="words"
                   autoComplete="name-family"
                 />
+                {lastNameError ? (
+                  <Text style={styles.errorText}>{lastNameError}</Text>
+                ) : null}
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, emailError && styles.inputError]}
+                  placeholder="email"
+                  placeholderTextColor="#999"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={handleEmailChange}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
                 />
+                {emailError ? (
+                  <Text style={styles.errorText}>{emailError}</Text>
+                ) : null}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Phone number</Text>
+                <TextInput
+                  style={[styles.input, phoneNumberError && styles.inputError]}
+                  placeholder="phone number"
+                  placeholderTextColor="#999"
+                  value={phoneNumber}
+                  onChangeText={handlePhoneNumberChange}
+                  keyboardType="phone-pad"
+                  autoComplete="tel"
+                />
+                {phoneNumberError ? (
+                  <Text style={styles.errorText}>{phoneNumberError}</Text>
+                ) : null}
               </View>
 
               <View style={styles.inputGroup}>
@@ -149,40 +346,84 @@ export default function RegisterScreen() {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="password-new"
-                />
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={[styles.input, styles.passwordInput, passwordError && styles.inputError]}
+                    placeholder="password"
+                    placeholderTextColor="#999"
+                    value={password}
+                    onChangeText={handlePasswordChange}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoComplete="password-new"
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeButton}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={24}
+                      color="#000"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {passwordError ? (
+                  <Text style={styles.errorText}>{passwordError}</Text>
+                ) : null}
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Confirm Password</Text>
-                <TextInput
-                  style={styles.input}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="password-new"
-                />
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={[styles.input, styles.passwordInput, confirmPasswordError && styles.inputError]}
+                    placeholder="confirm password"
+                    placeholderTextColor="#999"
+                    value={confirmPassword}
+                    onChangeText={handleConfirmPasswordChange}
+                    secureTextEntry={!showConfirmPassword}
+                    autoCapitalize="none"
+                    autoComplete="password-new"
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeButton}
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    <Ionicons
+                      name={showConfirmPassword ? 'eye-off' : 'eye'}
+                      size={24}
+                      color="#000"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {confirmPasswordError ? (
+                  <Text style={styles.errorText}>{confirmPasswordError}</Text>
+                ) : null}
               </View>
-
-              <TouchableOpacity
-                style={[styles.registerButton, loading && styles.registerButtonDisabled]}
-                onPress={handleRegister}
-                disabled={loading}
-              >
-                <Text style={styles.registerButtonText}>
-                  {loading ? 'Creating account...' : 'Register'}
-                </Text>
-              </TouchableOpacity>
             </View>
+
+            <CustomAlert
+              visible={alertVisible}
+              title={alertConfig.title}
+              message={alertConfig.message}
+              onClose={() => setAlertVisible(false)}
+            />
           </View>
         </ScrollView>
+
+        {/* Fixed Register Button */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.registerButton, isButtonDisabled && styles.registerButtonDisabled]}
+            onPress={handleRegister}
+            disabled={isButtonDisabled}
+          >
+            <Text style={styles.registerButtonText}>
+              Register
+            </Text>
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
 
       {/* Role Selection Modal */}
@@ -238,7 +479,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   backButton: {
     position: 'absolute',
@@ -264,16 +505,16 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#000000',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 60,
   },
   formContainer: {
-    gap: 20,
+    gap: 24,
   },
   inputGroup: {
     gap: 8,
   },
   label: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#000000',
     fontWeight: '400',
     marginLeft: 4,
@@ -287,6 +528,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     fontSize: 16,
     color: '#000000',
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+  },
+  inputError: {
+    borderColor: '#DC2626',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#DC2626',
+    marginLeft: 4,
+    marginTop: 2,
   },
   selectInput: {
     backgroundColor: '#FFFFFF',
@@ -307,6 +572,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#000000',
   },
+  buttonContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5E5',
+  },
   registerButton: {
     backgroundColor: '#FFFFFF',
     borderWidth: 2,
@@ -314,10 +587,11 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 16,
   },
   registerButtonDisabled: {
-    opacity: 0.6,
+    backgroundColor: '#F5F5F5',
+    borderColor: '#CCCCCC',
+    opacity: 0.7,
   },
   registerButtonText: {
     fontSize: 16,
