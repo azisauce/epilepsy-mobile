@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import CustomAlert from '../../components/CustomAlert';
+
 import {
   View,
   Text,
@@ -31,10 +34,84 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    title: '',
+    message: '',
+  });
+
+  const showAlert = (title: string, message: string) => {
+    setAlertConfig({ title, message });
+    setAlertVisible(true);
+  };
+
+
+  // Email validation
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Password validation
+  const validatePassword = (password: string): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    if (password.length < 8) {
+      errors.push('Minimum 8 characters required');
+    }
+    
+    if (!/[a-zA-Z]/.test(password)) {
+      errors.push('Must contain at least one letter');
+    }
+    
+    if (!/\d/.test(password)) {
+      errors.push('Must contain at least one digit');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  };
+
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    if (emailError) setEmailError('');
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    if (passwordError) setPasswordError('');
+  };
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+    // Reset errors
+    setEmailError('');
+    setPasswordError('');
+
+    // Validate email
+    if (!email) {
+      setEmailError('Email is required');
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+
+    // Validate password
+    if (!password) {
+      setPasswordError('Password is required');
+      return;
+    }
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setPasswordError(passwordValidation.errors.join(' & '));
       return;
     }
 
@@ -42,14 +119,13 @@ export default function LoginScreen() {
     try {
       await login(email, password);
     } catch (error) {
-      Alert.alert('Login Error', 'Invalid email or password');
+      showAlert('Oups!', 'Email or password is incorrect. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleForgotPassword = () => {
-    // Navigate to forgot password screen or show alert
     Alert.alert('Forgot Password', 'Password reset functionality coming soon');
   };
 
@@ -77,29 +153,47 @@ export default function LoginScreen() {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, emailError && styles.inputError]}
                   placeholder="email"
                   placeholderTextColor="#999"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={handleEmailChange}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
                 />
+                {emailError ? (
+                  <Text style={styles.errorText}>{emailError}</Text>
+                ) : null}
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="password"
-                  placeholderTextColor="#999"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="password"
-                />
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={[styles.input, styles.passwordInput, passwordError && styles.inputError]}
+                    placeholder="password"
+                    placeholderTextColor="#999"
+                    value={password}
+                    onChangeText={handlePasswordChange}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoComplete="password"
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeButton}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off' : 'eye'} // eye-off = crossed eye
+                      size={24}
+                      color="#000"
+                    />
+                  </TouchableOpacity>
+                </View>
+                {passwordError ? (
+                  <Text style={styles.errorText}>{passwordError}</Text>
+                ) : null}
               </View>
 
               <TouchableOpacity
@@ -108,7 +202,7 @@ export default function LoginScreen() {
                 disabled={loading}
               >
                 <Text style={styles.loginButtonText}>
-                  {loading ? 'Logging in...' : 'Login'}
+                  Login
                 </Text>
               </TouchableOpacity>
 
@@ -121,6 +215,12 @@ export default function LoginScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
+            <CustomAlert
+              visible={alertVisible}
+              title={alertConfig.title}
+              message={alertConfig.message}
+              onClose={() => setAlertVisible(false)}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -187,6 +287,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000000',
   },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+  },
+  eyeIcon: {
+    fontSize: 20,
+  },
+  inputError: {
+    borderColor: '#DC2626',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#DC2626',
+    marginLeft: 4,
+    marginTop: 2,
+  },
   loginButton: {
     backgroundColor: '#FFFFFF',
     borderWidth: 2,
@@ -197,7 +324,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   loginButtonDisabled: {
-    opacity: 0.6,
+    backgroundColor: '#F5F5F5',
+    borderColor: '#CCCCCC',
+    opacity: 0.7,
   },
   loginButtonText: {
     fontSize: 16,
