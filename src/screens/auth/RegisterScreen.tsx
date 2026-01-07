@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import CustomAlert from '../../components/CustomAlert';
+import { logger } from '../../utils/logger';
 import {
   View,
   Text,
@@ -228,6 +229,7 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
+      console.log('📝 Starting registration process');
       await register({
         email,
         password,
@@ -236,8 +238,31 @@ export default function RegisterScreen() {
         phoneNumber,
         role: userRole,
       });
+      console.log('✅ Registration completed successfully');
+      showAlert('Success', 'Account created successfully!');
     } catch (error: any) {
-      showAlert('Registration Error', error.message || 'Failed to create account');
+      console.error('❌ Registration failed with error:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        userMessage: error.userMessage,
+      });
+      
+      // Parse Firebase error codes to user-friendly messages
+      let userMessage = error.message || 'Failed to create account';
+      if (error.code === 'auth/email-already-in-use') {
+        userMessage = 'This email is already registered. Please use a different email.';
+      } else if (error.code === 'auth/weak-password') {
+        userMessage = 'Password is too weak. Please use a stronger password.';
+      } else if (error.code === 'auth/invalid-email') {
+        userMessage = 'Invalid email address. Please check and try again.';
+      } else if (error.code === 'auth/operation-not-allowed') {
+        userMessage = 'Registration is currently disabled. Please try again later.';
+      } else if (error.code === 'permission-denied') {
+        userMessage = 'Permission denied. Check your Firebase Firestore rules.';
+      }
+      
+      showAlert('Registration Error', userMessage);
     } finally {
       setLoading(false);
     }
