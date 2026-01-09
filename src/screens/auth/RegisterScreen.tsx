@@ -70,7 +70,7 @@ export default function RegisterScreen() {
     message: '',
   });
 
-  // Load invitation if invitationId is provided
+  // Load invitation if invitationId is provide d
   useEffect(() => {
     const loadInvitation = async () => {
       const { invitationId } = route.params || {};
