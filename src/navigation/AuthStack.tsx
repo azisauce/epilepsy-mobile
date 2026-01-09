@@ -4,7 +4,13 @@ import WelcomeScreen from '../screens/auth/WelcomeScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 
-const Stack = createNativeStackNavigator();
+export type AuthStackParamList = {
+  Welcome: undefined;
+  Login: undefined;
+  Register: { invitationId?: string };
+};
+
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthStack() {
   return (
@@ -14,13 +20,16 @@ export default function AuthStack() {
         headerShown: false,
       }}
     >
-      <Stack.Screen 
-        name="Welcome" 
+      <Stack.Screen
+        name="Welcome"
         component={WelcomeScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen
+        name="Register"
+        component={RegisterScreen}
+      />
     </Stack.Navigator>
   );
 }

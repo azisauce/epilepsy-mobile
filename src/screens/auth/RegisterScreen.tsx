@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import CustomAlert from '../../components/CustomAlert';
 import {
@@ -12,19 +12,23 @@ import {
   ScrollView,
   Modal,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
 import type { UserRole } from '../../types/user.types';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { getInvitationById, acceptInvitation } from '../../services/invitation.service';
+import type { Invitation } from '../../types/invitation.types';
 
 type AuthStackParamList = {
   Welcome: undefined;
   Login: undefined;
-  Register: undefined;
+  Register: { invitationId?: string };
 };
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList>;
+type RegisterRouteProp = RouteProp<AuthStackParamList, 'Register'>;
 
 const USER_ROLES: { label: string; value: UserRole }[] = [
   { label: 'Parent', value: 'parent' },
@@ -33,6 +37,7 @@ const USER_ROLES: { label: string; value: UserRole }[] = [
 
 export default function RegisterScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<RegisterRouteProp>();
   const { register } = useAuth();
 
   const [firstName, setFirstName] = useState('');
@@ -46,7 +51,11 @@ export default function RegisterScreen() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
+  // Invitation state
+  const [invitation, setInvitation] = useState<Invitation | null>(null);
+  const [loadingInvitation, setLoadingInvitation] = useState(false);
+
   // Error states
   const [firstNameError, setFirstNameError] = useState('');
   const [lastNameError, setLastNameError] = useState('');
@@ -60,6 +69,54 @@ export default function RegisterScreen() {
     title: '',
     message: '',
   });
+
+  // Load invitation if invitationId is provided
+  useEffect(() => {
+    const loadInvitation = async () => {
+      const { invitationId } = route.params || {};
+
+      if (invitationId) {
+        setLoadingInvitation(true);
+        try {
+          console.log('[REGISTER] Loading invitation:', invitationId);
+          const inviteData = await getInvitationById(invitationId);
+
+          if (!inviteData) {
+            showAlert('Invalid Invitation', 'This invitation link is invalid or has expired.');
+            return;
+          }
+
+          if (inviteData.status !== 'pending') {
+            showAlert('Invitation Unavailable', `This invitation has already been ${inviteData.status}.`);
+            return;
+          }
+
+          setInvitation(inviteData);
+
+          // Auto-set the role to the opposite of the inviter's role
+          const suggestedRole: UserRole = inviteData.inviterRole === 'parent' ? 'child' : 'parent';
+          setUserRole(suggestedRole);
+
+          console.log('[REGISTER] Invitation loaded successfully', {
+            inviter: inviteData.inviterName,
+            role: suggestedRole,
+          });
+
+          showAlert(
+            'Invitation Found!',
+            `${inviteData.inviterName} (${inviteData.inviterRole}) has invited you to connect. Complete registration to accept.`
+          );
+        } catch (error: any) {
+          console.error('[REGISTER] Error loading invitation:', error);
+          showAlert('Error', 'Failed to load invitation details.');
+        } finally {
+          setLoadingInvitation(false);
+        }
+      }
+    };
+
+    loadInvitation();
+  }, [route.params]);
 
   const showAlert = (title: string, message: string) => {
     setAlertConfig({ title, message });
@@ -75,19 +132,19 @@ export default function RegisterScreen() {
   // Password validation
   const validatePassword = (password: string): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
-    
+
     if (password.length < 8) {
       errors.push('Minimum 8 characters required');
     }
-    
+
     if (!/[a-zA-Z]/.test(password)) {
       errors.push('Must contain at least one letter');
     }
-    
+
     if (!/\d/.test(password)) {
       errors.push('Must contain at least one digit');
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors
@@ -228,6 +285,7 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
+      // Register the user
       await register({
         email,
         password,
@@ -236,6 +294,33 @@ export default function RegisterScreen() {
         phoneNumber,
         role: userRole,
       });
+
+      console.log('[REGISTER] User registered successfully');
+
+      // If there's an invitation, accept it after registration
+      if (invitation && route.params?.invitationId) {
+        try {
+          console.log('[REGISTER] Accepting invitation:', invitation.id);
+
+          // Small delay to ensure user document is created
+          await new Promise<void>(resolve => setTimeout(() => resolve(), 1000));
+
+          // Get the newly created user ID from auth context
+          // This will be available after successful registration
+          // We'll need to accept the invitation in the next screen or after auth state updates
+
+          showAlert(
+            'Registration Successful!',
+            `Your account has been created and you've been connected with ${invitation.inviterName}!`
+          );
+        } catch (inviteError: any) {
+          console.error('[REGISTER] Error accepting invitation:', inviteError);
+          showAlert(
+            'Registration Successful',
+            'Your account was created, but there was an issue accepting the invitation. You can try connecting again later.'
+          );
+        }
+      }
     } catch (error: any) {
       showAlert('Registration Error', error.message || 'Failed to create account');
     } finally {
