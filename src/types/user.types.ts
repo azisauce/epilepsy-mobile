@@ -12,9 +12,9 @@ export interface User {
 }
 
 export interface Parent extends User {
-  linkedChildrenIds: [];
+  linkedChildrenIds: string[];
 }
 
 export interface Child extends User {
-  linkedParentsIds: [];
+  linkedParentsIds: string[];
 }

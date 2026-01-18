@@ -50,5 +50,20 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	
+	<!-- Deep Link Configuration for Invitation Links -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.epilepsy_mobile_app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>epilepsy-app</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

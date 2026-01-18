@@ -3,16 +3,16 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import CustomButton from '../../components/CustomButton';
 
 type AuthStackParamList = {
   Welcome: undefined;
   Login: undefined;
-  Register: undefined;
+  Register: { invitationId?: string };
 };
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList>;
@@ -31,19 +31,17 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.primaryButton}
+          <CustomButton
+            title="Already have an account"
             onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.primaryButtonText}>Already have an account</Text>
-          </TouchableOpacity>
+            variant="primary"
+          />
 
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => navigation.navigate('Register')}
-          >
-            <Text style={styles.secondaryButtonText}>Be a member</Text>
-          </TouchableOpacity>
+          <CustomButton
+            title="Be a member"
+            onPress={() => navigation.navigate('Register', {})}
+            variant="secondary"
+          />
         </View>
       </View>
     </SafeAreaProvider>
@@ -82,33 +80,5 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     gap: 16,
-  },
-  primaryButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#000000',
-    borderRadius: 25,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    fontSize: 16,
-    color: '#000000',
-    fontWeight: '500',
-  },
-  secondaryButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#000000',
-    borderRadius: 25,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    fontSize: 16,
-    color: '#000000',
-    fontWeight: '500',
   },
 });
