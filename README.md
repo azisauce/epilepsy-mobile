@@ -95,8 +95,46 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
-- 
 
+---
+
+## Testing Deep Links (Invitation System)
+
+This app supports deep linking for the invitation feature. Users can share invitation links that open the app directly to the registration screen with the invitation pre-loaded.
+
+### Deep Link Format
+
+```
+epilepsy-app://invite/{invitationId}
+```
+
+**Example:**
+```
+epilepsy-app://invite/5Iuc7iRya8x48XSJFMcU
+```
+
+### Testing on Android with ADB
+
+While the app is running on a device or emulator, use the following command to test deep links:
+
+```bash
+adb shell am start -W -a android.intent.action.VIEW \
+  -d "epilepsy-app://invite/{invitationId}" \
+  com.epilepsy_mobile_app
+```
+
+**Real Example:**
+```bash
+adb shell am start -W -a android.intent.action.VIEW \
+  -d "epilepsy-app://invite/5Iuc7iRya8x48XSJFMcU" \
+  com.epilepsy_mobile_app
+```
+
+
+## Quick Commands
+
+```bash
 npx react-native start --reset-cache
 adb devices
 npm run android
+```
