@@ -1,100 +1,114 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Epilepsy Mobile App
 
-# Getting Started
+A React Native application for monitoring and helping with epilepsy management, featuring parent-child relationship management through invitation links.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Prerequisites
 
-## Step 1: Start Metro
+Before you begin, make sure you have the following installed:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### Required Software
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- **Node.js 22.x** (LTS recommended)
+  ```bash
+  node --version  # Should show v22.x.x
+  ```
 
-```sh
-# Using npm
+- **Java Development Kit (JDK) 17**
+  ```bash
+  java -version  # Should show version 17
+  ```
+  - Set `JAVA_HOME` environment variable
+  - Add JDK bin directory to your `PATH`
+
+- **Android Studio** (for Android development)
+  - Android SDK Platform 33 or higher
+  - Android SDK Build-Tools
+  - Android Emulator (optional, for testing)
+
+- **Xcode** (for iOS development, macOS only)
+  - Xcode 14 or higher
+  - CocoaPods: `sudo gem install cocoapods`
+
+### Environment Variables
+
+Add these to your `.bashrc`, `.zshrc`, or equivalent:
+
+```bash
+# Java
+export JAVA_HOME=/path/to/jdk-17
+export PATH=$JAVA_HOME/bin:$PATH
+
+# Android
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+```
+
+## Getting Started
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Firebase Configuration
+
+This project uses Firebase for authentication and Firestore. Make sure you have:
+
+- Created a Firebase project
+- Added your `google-services.json` to `android/app/`
+- Added your `GoogleService-Info.plist` to `ios/`
+- Updated Firestore security rules (see `firebase_setup_guide.md`)
+
+### 3. Start Metro Bundler
+
+```bash
 npm start
-
-# OR using Yarn
-yarn start
+# OR with cache reset
+npx react-native start --reset-cache
 ```
 
-## Step 2: Build and run your app
+### 4. Run the Application
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
+**Android:**
+```bash
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+**iOS (macOS only):**
+```bash
+# First time only: Install CocoaPods dependencies
+cd ios && pod install && cd ..
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# Run the app
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Development
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+- Press <kbd>R</kbd> twice (Android) or <kbd>R</kbd> once (iOS) to reload
+- Press <kbd>Ctrl</kbd>+<kbd>M</kbd> (Android) or <kbd>Cmd</kbd>+<kbd>D</kbd> (iOS) to open developer menu
+- Use Chrome DevTools for debugging: `chrome://inspect`
 
-## Step 3: Modify your app
+## Troubleshooting
 
-Now that you have successfully run the app, let's make changes!
+**Metro bundler issues:**
+```bash
+npx react-native start --reset-cache
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+**Android build issues:**
+```bash
+cd android && ./gradlew clean && cd ..
+npm run android
+```
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**iOS build issues:**
+```bash
+cd ios && pod install && cd ..
+npm run ios
+```
 
 ---
 
