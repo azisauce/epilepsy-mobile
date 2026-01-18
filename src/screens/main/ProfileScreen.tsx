@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, ScrollView } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useAuth } from '../../context/AuthContext';
 import CustomButton from '../../components/CustomButton';
+import CustomHeader from '../../components/CustomHeader';
 import { generateInviteLink } from '../../services/invitation.service';
+import { COLORS } from '../../constants/colors';
 
 export default function ProfileScreen() {
   const { logout, profile } = useAuth();
@@ -43,32 +45,41 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      <Text style={styles.name}>{profile?.firstName} {profile?.lastName}</Text>
-      <Text style={styles.role}>Role: {profile?.role}</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <CustomHeader
+          variant="profile"
+          title="Profile"
+          userName={`${profile?.firstName} ${profile?.lastName}`}
+          userRole={profile?.role as 'parent' | 'child'}
+        />
 
-      {inviteLink && (
-        <View style={styles.linkContainer}>
-          <Text style={styles.linkLabel}>Your Invite Link:</Text>
-          <Text style={styles.linkText} numberOfLines={2}>{inviteLink}</Text>
+        <View style={styles.content}>
+          {inviteLink && (
+            <View style={styles.linkContainer}>
+              <Text style={styles.linkLabel}>Your Invite Link:</Text>
+              <Text style={styles.linkText}>{inviteLink}</Text>
+            </View>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              title={loading ? 'Generating...' : 'Generate Invite Link'}
+              onPress={handleGenerateInviteLink}
+              variant="primary"
+            />
+
+            <CustomButton
+              title="Logout"
+              onPress={logout}
+              variant="primary"
+              style={styles.logoutButton}
+            />
+          </View>
         </View>
-      )}
-
-      <View style={styles.buttonContainer}>
-        <CustomButton
-          title={loading ? 'Generating...' : 'Generate Invite Link'}
-          onPress={handleGenerateInviteLink}
-          variant="primary"
-        />
-
-        <CustomButton
-          title="Logout"
-          onPress={logout}
-          variant="secondary"
-          style={styles.logoutButton}
-          textColor="#FF3B30"
-        />
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -76,54 +87,48 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-  name: {
-    fontSize: 20,
-    color: '#666',
-    marginBottom: 10,
-  },
-  role: {
-    fontSize: 16,
-    color: '#999',
-    marginBottom: 30,
-    textTransform: 'capitalize',
   },
   linkContainer: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    width: '90%',
+    backgroundColor: COLORS.white,
+    padding: 16,
+    borderRadius: 12,
+    width: '100%',
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    shadowColor: COLORS.secondary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   linkLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.secondary,
     marginBottom: 8,
   },
   linkText: {
     fontSize: 12,
-    color: '#007AFF',
+    color: COLORS.primary,
     fontFamily: 'monospace',
+    backgroundColor: COLORS.lightGray,
+    padding: 8,
+    borderRadius: 4,
   },
   buttonContainer: {
-    width: '80%',
-    marginTop: 20,
+    width: '100%',
     gap: 16,
   },
   logoutButton: {
-    borderColor: '#FF3B30',
+    borderColor: COLORS.error,
   },
 });

@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;  // NEW: Manually refresh profile
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,6 +53,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await logoutService();
   };
 
+  // NEW: Refresh profile from Firestore
+  const refreshProfile = async () => {
+    if (user) {
+      console.log('[AUTH] Refreshing profile for user:', user.uid);
+      const profileData = await getUserProfile(user.uid);
+      setProfile(profileData ?? null);
+      console.log('[AUTH] Profile refreshed');
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -61,6 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         register,
         logout,
+        refreshProfile,  // NEW: Expose refreshProfile
       }}
     >
       {children}

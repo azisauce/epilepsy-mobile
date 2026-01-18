@@ -1,24 +1,22 @@
-export const colors = {
-  primary: '#6366F1',
-  secondary: '#8B5CF6',
-  success: '#10B981',
-  danger: '#EF4444',
-  warning: '#F59E0B',
-  info: '#3B82F6',
-  light: '#F3F4F6',
-  dark: '#1F2937',
+export const COLORS = {
+  primary: '#2FBF9C',      // Main Green (teal-leaning, confident)
+  secondary: '#1E6F5C',    // Deep Green (headers, buttons)
+  accent: '#A7E3C6',       // Soft Mint (highlights, tags)
+  background: '#F2FBF7',   // Very Light Green (page background)
   white: '#FFFFFF',
-  black: '#000000',
-  gray: {
-    50: '#F9FAFB',
-    100: '#F3F4F6',
-    200: '#E5E7EB',
-    300: '#D1D5DB',
-    400: '#9CA3AF',
-    500: '#6B7280',
-    600: '#4B5563',
-    700: '#374151',
-    800: '#1F2937',
-    900: '#111827',
+  black: '#0B1F1A',        // Soft Black (less harsh)
+  error: '#E5484D',        // Muted Red (still accessible)
+  gray: '#7A8F87',         // Green-tinted Gray
+  lightGray: '#E6F1EC',    // Green-tinted Light Gray
+};
+
+export const THEME = {
+  colors: COLORS,
+  spacing: {
+    xs: 4,
+    s: 8,
+    m: 16,
+    l: 24,
+    xl: 40,
   },
 };

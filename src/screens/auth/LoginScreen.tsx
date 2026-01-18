@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
+import CustomButton from '../../components/CustomButton';
 import CustomAlert from '../../components/CustomAlert';
+import { COLORS } from '../../constants/colors';
 
 import {
   View,
@@ -30,7 +32,7 @@ type NavigationProp = NativeStackNavigationProp<AuthStackParamList>;
 export default function LoginScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { login } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -58,19 +60,19 @@ export default function LoginScreen() {
   // Password validation
   const validatePassword = (password: string): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
-    
+
     if (password.length < 8) {
       errors.push('Minimum 8 characters required');
     }
-    
+
     if (!/[a-zA-Z]/.test(password)) {
       errors.push('Must contain at least one letter');
     }
-    
+
     if (!/\d/.test(password)) {
       errors.push('Must contain at least one digit');
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors
@@ -97,7 +99,7 @@ export default function LoginScreen() {
       setEmailError('Email is required');
       return;
     }
-    
+
     if (!validateEmail(email)) {
       setEmailError('Please enter a valid email address');
       return;
@@ -187,7 +189,7 @@ export default function LoginScreen() {
                     <Ionicons
                       name={showPassword ? 'eye-off' : 'eye'} // eye-off = crossed eye
                       size={24}
-                      color="#000"
+                      color={COLORS.secondary}
                     />
                   </TouchableOpacity>
                 </View>
@@ -196,15 +198,12 @@ export default function LoginScreen() {
                 ) : null}
               </View>
 
-              <TouchableOpacity
-                style={[styles.loginButton, loading && styles.loginButtonDisabled]}
-                onPress={handleLogin}
-                disabled={loading}
-              >
-                <Text style={styles.loginButtonText}>
-                  Login
-                </Text>
-              </TouchableOpacity>
+              <CustomButton
+                title="Login"
+                onPress={loading ? () => { } : handleLogin}
+                variant="primary"
+                style={{ marginTop: 16 }}
+              />
 
               <TouchableOpacity
                 style={styles.forgotPasswordButton}
@@ -231,7 +230,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.background, // Using background (Beige) for consistency
   },
   keyboardView: {
     flex: 1,
@@ -250,7 +249,7 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     fontSize: 40,
-    color: '#000000',
+    color: COLORS.secondary,
     fontWeight: '300',
   },
   content: {
@@ -261,7 +260,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '400',
-    color: '#000000',
+    color: COLORS.secondary,
     textAlign: 'center',
     marginBottom: 60,
   },
@@ -273,19 +272,19 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 18,
-    color: '#000000',
+    color: COLORS.secondary,
     fontWeight: '400',
     marginLeft: 4,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.white,
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: COLORS.secondary,
     borderRadius: 25,
     paddingVertical: 14,
     paddingHorizontal: 20,
     fontSize: 16,
-    color: '#000000',
+    color: COLORS.secondary,
   },
   passwordContainer: {
     position: 'relative',
@@ -306,32 +305,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   inputError: {
-    borderColor: '#DC2626',
+    borderColor: COLORS.error,
   },
   errorText: {
     fontSize: 12,
-    color: '#DC2626',
+    color: COLORS.error,
     marginLeft: 4,
     marginTop: 2,
-  },
-  loginButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#000000',
-    borderRadius: 25,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  loginButtonDisabled: {
-    backgroundColor: '#F5F5F5',
-    borderColor: '#CCCCCC',
-    opacity: 0.7,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    color: '#000000',
-    fontWeight: '500',
   },
   forgotPasswordButton: {
     alignSelf: 'center',
@@ -339,7 +319,7 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: 14,
-    color: '#000000',
+    color: COLORS.secondary,
     textAlign: 'center',
   },
 });

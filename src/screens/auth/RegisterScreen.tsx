@@ -21,6 +21,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { getInvitationById, acceptInvitation } from '../../services/invitation.service';
 import type { Invitation } from '../../types/invitation.types';
 import CustomButton from '../../components/CustomButton';
+import { auth } from '../../config/firebase.config';
+import { COLORS } from '../../constants/colors';
 
 type AuthStackParamList = {
   Welcome: undefined;
@@ -39,7 +41,7 @@ const USER_ROLES: { label: string; value: UserRole }[] = [
 export default function RegisterScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RegisterRouteProp>();
-  const { register } = useAuth();
+  const { register, refreshProfile } = useAuth();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -303,12 +305,32 @@ export default function RegisterScreen() {
         try {
           console.log('[REGISTER] Accepting invitation:', invitation.id);
 
-          // Small delay to ensure user document is created
-          await new Promise<void>(resolve => setTimeout(() => resolve(), 1000));
+          // Small delay to ensure user document is created and auth state updated
+          await new Promise<void>(resolve => setTimeout(() => resolve(), 2000));
 
-          // Get the newly created user ID from auth context
-          // This will be available after successful registration
-          // We'll need to accept the invitation in the next screen or after auth state updates
+          // Get the newly created user ID from Firebase auth
+          const currentUser = auth().currentUser;
+
+          if (!currentUser) {
+            throw new Error('No authenticated user found after registration');
+          }
+
+          console.log('[REGISTER] Current user ID:', currentUser.uid);
+          console.log('[REGISTER] Accepting invitation with role:', userRole);
+
+          // Accept the invitation
+          await acceptInvitation({
+            invitationId: invitation.id,
+            acceptingUserId: currentUser.uid,
+            acceptingUserRole: userRole,
+          });
+
+          console.log('[REGISTER] Invitation accepted successfully');
+
+          // Refresh the profile to get updated relationship arrays
+          console.log('[REGISTER] Refreshing user profile...');
+          await refreshProfile();
+          console.log('[REGISTER] Profile refreshed with updated relationships');
 
           showAlert(
             'Registration Successful!',
@@ -569,14 +591,14 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.background,
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 40,
   },
   backButton: {
     position: 'absolute',
@@ -589,7 +611,7 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     fontSize: 40,
-    color: '#000000',
+    color: COLORS.secondary,
     fontWeight: '300',
   },
   content: {
@@ -600,7 +622,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '400',
-    color: '#000000',
+    color: COLORS.secondary,
     textAlign: 'center',
     marginBottom: 60,
   },
@@ -612,19 +634,24 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 18,
-    color: '#000000',
+    color: COLORS.secondary,
     fontWeight: '400',
     marginLeft: 4,
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#000000',
+    backgroundColor: COLORS.white,
     borderRadius: 25,
     paddingVertical: 14,
     paddingHorizontal: 20,
     fontSize: 16,
-    color: '#000000',
+    color: COLORS.black,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    shadowColor: COLORS.secondary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   passwordContainer: {
     position: 'relative',
@@ -642,43 +669,48 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   inputError: {
-    borderColor: '#DC2626',
+    borderColor: COLORS.error,
   },
   errorText: {
     fontSize: 12,
-    color: '#DC2626',
+    color: COLORS.error,
     marginLeft: 4,
     marginTop: 2,
   },
   selectInput: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#000000',
+    backgroundColor: COLORS.white,
     borderRadius: 25,
     paddingVertical: 14,
     paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    shadowColor: COLORS.secondary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   selectText: {
     fontSize: 16,
-    color: '#000000',
+    color: COLORS.black,
   },
   selectArrow: {
     fontSize: 12,
-    color: '#000000',
+    color: COLORS.secondary,
   },
   lockedRoleContainer: {
     gap: 8,
   },
   lockIcon: {
     fontSize: 16,
-    color: '#999',
+    color: COLORS.gray,
   },
   roleInfoText: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.gray,
     fontStyle: 'italic',
     marginTop: 4,
   },
@@ -686,27 +718,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
     paddingBottom: Platform.OS === 'ios' ? 24 : 16,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    backgroundColor: 'transparent',
   },
   registerButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#000000',
+    backgroundColor: COLORS.primary,
     borderRadius: 25,
     paddingVertical: 14,
     alignItems: 'center',
+    shadowColor: COLORS.secondary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   registerButtonDisabled: {
-    backgroundColor: '#F5F5F5',
-    borderColor: '#CCCCCC',
+    backgroundColor: COLORS.gray,
     opacity: 0.7,
   },
   registerButtonText: {
     fontSize: 16,
-    color: '#000000',
-    fontWeight: '500',
+    color: COLORS.white,
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
@@ -715,7 +747,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.white,
     borderRadius: 20,
     padding: 24,
     width: '80%',
@@ -724,27 +756,29 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '500',
-    color: '#000000',
+    color: COLORS.secondary,
     textAlign: 'center',
     marginBottom: 20,
   },
   modalOption: {
     paddingVertical: 16,
     paddingHorizontal: 20,
-    borderWidth: 2,
-    borderColor: '#000000',
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
     borderRadius: 15,
     marginBottom: 12,
   },
   modalOptionSelected: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: COLORS.lightGray,
+    borderColor: COLORS.primary,
   },
   modalOptionText: {
     fontSize: 16,
-    color: '#000000',
+    color: COLORS.black,
     textAlign: 'center',
   },
   modalOptionTextSelected: {
-    fontWeight: '500',
+    fontWeight: '600',
+    color: COLORS.primary,
   },
 });

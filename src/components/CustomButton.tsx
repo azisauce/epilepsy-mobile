@@ -9,6 +9,10 @@ interface CustomButtonProps {
     textColor?: string;  // Allow custom text color
 }
 
+import { COLORS } from '../constants/colors';
+
+// ... interface ...
+
 export default function CustomButton({
     title,
     onPress,
@@ -16,16 +20,22 @@ export default function CustomButton({
     style,
     textColor
 }: CustomButtonProps) {
+    const isPrimary = variant === 'primary';
+
     return (
         <TouchableOpacity
             style={[
                 styles.button,
-                variant === 'secondary' && styles.secondaryButton,
+                isPrimary ? styles.primaryButton : styles.secondaryButton,
                 style
             ]}
             onPress={onPress}
         >
-            <Text style={[styles.buttonText, textColor && { color: textColor }]}>
+            <Text style={[
+                styles.buttonText,
+                isPrimary ? styles.primaryText : styles.secondaryText,
+                textColor && { color: textColor }
+            ]}>
                 {title}
             </Text>
         </TouchableOpacity>
@@ -34,20 +44,35 @@ export default function CustomButton({
 
 const styles = StyleSheet.create({
     button: {
-        backgroundColor: '#FFFFFF',
-        borderWidth: 2,
-        borderColor: '#000000',
         borderRadius: 25,
         paddingVertical: 16,
         paddingHorizontal: 32,
         alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 200,
+    },
+    primaryButton: {
+        backgroundColor: COLORS.secondary,
+        borderWidth: 0,
+        elevation: 3,
+        shadowColor: COLORS.secondary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
     },
     secondaryButton: {
-        // Add any secondary-specific styles here if needed
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderColor: COLORS.secondary,
     },
     buttonText: {
         fontSize: 16,
-        color: '#000000',
-        fontWeight: '500',
+        fontWeight: '600',
+    },
+    primaryText: {
+        color: COLORS.white,
+    },
+    secondaryText: {
+        color: COLORS.secondary,
     },
 });
