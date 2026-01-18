@@ -1,15 +1,16 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, View, Text } from 'react-native';
 import { themesData } from '../../data/themesData';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Theme } from '../../types/themes.types';
+import CustomHeader from '../../components/CustomHeader';
 
 export default function ThemesScreen() {
   // Define the navigation prop type
   const navigation = useNavigation<StackNavigationProp<any, 'ThemesScreen'>>();
 
-  const renderTheme = ({ item } : {item: Theme}) => (
+  const renderTheme = ({ item }: { item: Theme }) => (
     <TouchableOpacity
       style={[styles.themeCard, { borderLeftColor: item.color }]}
       onPress={() => navigation.navigate('ThemeCourses', { theme: item })}
@@ -23,10 +24,11 @@ export default function ThemesScreen() {
 
   return (
     <SafeAreaProvider style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Themes</Text>
-        <Text style={styles.headerSubtitle}>Choose a topic to explore</Text>
-      </View>
+      <CustomHeader
+        variant="page"
+        title="Themes"
+        subtitle="Choose a topic to explore"
+      />
       <FlatList
         data={themesData}
         renderItem={renderTheme}
@@ -38,37 +40,25 @@ export default function ThemesScreen() {
   );
 }
 
+import { COLORS } from '../../constants/colors';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    padding: 20,
-    paddingTop: 10,
-    backgroundColor: '#fff',
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 5,
+    backgroundColor: COLORS.background,
   },
   listContainer: {
     padding: 15,
   },
   themeCard: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 20,
     marginBottom: 15,
     borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -79,11 +69,11 @@ const styles = StyleSheet.create({
   themeTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.secondary,
     marginBottom: 5,
   },
   courseCount: {
     fontSize: 14,
-    color: '#999',
+    color: COLORS.gray,
   },
 });

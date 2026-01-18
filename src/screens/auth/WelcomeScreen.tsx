@@ -48,10 +48,16 @@ export default function WelcomeScreen() {
   );
 }
 
+import { COLORS } from '../../constants/colors';
+
+// ... imports ...
+
+// ... component code ...
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
@@ -66,19 +72,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 32,
-    fontWeight: '400',
-    color: '#000000',
-    marginBottom: 40,
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: COLORS.secondary,
+    marginBottom: 24,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#000000',
+    fontSize: 18,
+    color: COLORS.secondary,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 28,
+    opacity: 0.8,
   },
   buttonContainer: {
     gap: 16,
+    width: '100%',
+    alignItems: 'center',
   },
 });
