@@ -20,6 +20,7 @@ import type { UserRole } from '../../types/user.types';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { getInvitationById, acceptInvitation } from '../../services/invitation.service';
 import type { Invitation } from '../../types/invitation.types';
+import CustomButton from '../../components/CustomButton';
 
 type AuthStackParamList = {
   Welcome: undefined;
@@ -420,13 +421,27 @@ export default function RegisterScreen() {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>User type</Text>
-                <TouchableOpacity
-                  style={styles.selectInput}
-                  onPress={() => setShowRoleModal(true)}
-                >
-                  <Text style={styles.selectText}>{selectedRoleLabel}</Text>
-                  <Text style={styles.selectArrow}>▼</Text>
-                </TouchableOpacity>
+                {invitation ? (
+                  // If there's an invitation, show locked role with info
+                  <View style={styles.lockedRoleContainer}>
+                    <View style={styles.selectInput}>
+                      <Text style={styles.selectText}>{selectedRoleLabel}</Text>
+                      <Text style={styles.lockIcon}>🔒</Text>
+                    </View>
+                    <Text style={styles.roleInfoText}>
+                      Role set by invitation from {invitation.inviterName}
+                    </Text>
+                  </View>
+                ) : (
+                  // Normal role selector when no invitation
+                  <TouchableOpacity
+                    style={styles.selectInput}
+                    onPress={() => setShowRoleModal(true)}
+                  >
+                    <Text style={styles.selectText}>{selectedRoleLabel}</Text>
+                    <Text style={styles.selectArrow}>▼</Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               <View style={styles.inputGroup}>
@@ -499,15 +514,12 @@ export default function RegisterScreen() {
 
         {/* Fixed Register Button */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.registerButton, isButtonDisabled && styles.registerButtonDisabled]}
+          <CustomButton
+            title={loading ? 'Registering...' : 'Register'}
             onPress={handleRegister}
-            disabled={isButtonDisabled}
-          >
-            <Text style={styles.registerButtonText}>
-              Register
-            </Text>
-          </TouchableOpacity>
+            variant="primary"
+            style={isButtonDisabled ? styles.registerButtonDisabled : undefined}
+          />
         </View>
       </KeyboardAvoidingView>
 
@@ -656,6 +668,19 @@ const styles = StyleSheet.create({
   selectArrow: {
     fontSize: 12,
     color: '#000000',
+  },
+  lockedRoleContainer: {
+    gap: 8,
+  },
+  lockIcon: {
+    fontSize: 16,
+    color: '#999',
+  },
+  roleInfoText: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 4,
   },
   buttonContainer: {
     paddingHorizontal: 24,
